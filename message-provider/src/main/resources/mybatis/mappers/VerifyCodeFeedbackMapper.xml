@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mysoft.b2b.bizsupport.mapper.VerifyCodeFeedbackMapper">
+	<insert id="saveVerifyCodeFeedback" parameterType="com.mysoft.b2b.bizsupport.api.VerifyCodeFeedback">
+		INSERT INTO `b2b_support`.`bizp_verify_code_feedback` (
+			`uid`,
+			`token`,
+			`verify_code`,
+			`mobile`,
+			`apply_time`,
+			`status`,
+			`operated_by`,
+			`operated_time`,
+			`remark`
+		)
+		VALUES
+			(
+				#{uid},
+				#{token},
+				#{verifyCode},
+				#{mobile},
+				#{applyTime},
+				#{status},
+				#{operatedBy},
+				#{operatedTime},
+				#{remark}
+			)
+	</insert>
+
+	<delete id="deleteVerifyCodeFeedbackByUid" parameterType="java.lang.String">
+		DELETE
+		FROM
+			`b2b_support`.`bizp_verify_code_feedback`
+		WHERE
+			uid = #{uid}
+	</delete>
+
+	<update id="updateVerifyCodeFeedback" parameterType="com.mysoft.b2b.bizsupport.api.VerifyCodeFeedback">
+		UPDATE `b2b_support`.`bizp_verify_code_feedback`
+		SET 
+		 `token` = #{token},
+		 `verify_code` = #{verifyCode},
+		 `mobile` = #{mobile},
+		 `apply_time` = #{applyTime},
+		 `status` = #{status},
+		 `operated_by` = #{operatedBy},
+		 `operated_time` = #{operatedTime},
+		 `remark` = #{remark}
+		WHERE
+			(`uid` = #{uid})
+	</update>
+
+	<select id="getVerifyCodeFeedbackList" parameterType="com.mysoft.b2b.bizsupport.api.VerifyCodeFeedback"
+		resultType="com.mysoft.b2b.bizsupport.api.VerifyCodeFeedback">
+		SELECT
+			`uid` AS uid,
+			`token` AS token,
+			`verify_code` AS verifyCode,
+			`mobile` AS mobile,
+			`apply_time` AS applyTime,
+			`status` AS `status`,
+			`operated_by` AS operatedBy,
+			`operated_time` AS operated_time,
+			`remark`
+		FROM
+			`b2b_support`.`bizp_verify_code_feedback`
+		<where>
+			<if test="uid != null">
+				AND uid = #{uid}
+			</if>
+			<if test="token != null">
+				AND token = #{token}
+			</if>
+			<if test="verifyCode != null">
+				AND verify_code = #{verifyCode}
+			</if>
+			<if test="mobile != null">
+				AND mobile = #{mobile}
+			</if>
+			<if test="applyTime != null">
+				AND apply_time = #{applyTime}
+			</if>
+			<if test="status != null">
+				AND status = #{status}
+			</if>
+			<if test="operatedBy != null">
+				AND operated_by = #{operatedBy}
+			</if>
+			<if test="operatedTime != null">
+				AND operated_time = #{operatedTime}
+			</if>
+			<if test="remark != null">
+				AND remark = #{remark}
+			</if>
+		</where>
+	</select>
+	
+</mapper>

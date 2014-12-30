@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mysoft.b2b.bizsupport.mapper.SiteMessageMapper">
+	
+	<update id="updateSiteMessageInbox" parameterType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageInbox">
+		 update b2b_support.bizp_sitemessage_inbox set
+		 		message_batch=#{messageBatch},
+				message_type_code=#{messageTypeCode},
+				title=#{title},
+				content=#{content},
+				attachments=#{attachments},
+				sender=#{sender},
+				sender_id=#{senderId},
+				receiver=#{receiver},
+				receiver_id=#{receiverId},
+				is_readed=#{isReaded},
+				is_deleted=#{isDeleted},
+				received_time=#{receivedTime},
+				readed_time=#{readedTime}
+		<where>
+			inbox_id = #{inboxId}
+		</where>
+	</update>
+	
+	<delete id="deleteSiteMessageInbox" parameterType="java.lang.String">
+		delete from b2b_support.bizp_sitemessage_inbox where inbox_id = #{0}
+	</delete>
+	
+	<select id="getSiteMessageInbox" parameterType="java.lang.String" resultType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageInbox">
+		select 
+				inbox_id as inboxId,
+				message_batch as messageBatch,
+				message_type_code as messageTypeCode,
+				title as title,
+				content as content,
+				attachments as attachments,
+				sender as sender,
+				sender_id as senderId,
+				receiver as receiver,
+				receiver_id as receiverId,
+				is_readed asisReaded,
+				is_deleted as isDeleted,
+				received_time as receivedTime,
+				readed_time as readedTime
+		from b2b_support.bizp_sitemessage_inbox
+		<where>
+			inbox_id = #{0}
+		</where>
+	</select>	
+	
+	<select id="getSiteMessageInboxList" resultType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageInbox" 
+		parameterType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageInboxCriteria">
+			select 
+				inbox_id as inboxId,
+				message_batch as messageBatch,
+				message_type_code as messageTypeCode,
+				title as title,
+				content as content,
+				attachments as attachments,
+				sender as sender,
+				sender_id as senderId,
+				receiver as receiver,
+				receiver_id as receiverId,
+				is_readed as isReaded,
+				is_deleted as isDeleted,
+				received_time as receivedTime,
+				readed_time as readedTime
+			from b2b_support.bizp_sitemessage_inbox
+			<where>
+				<if test="messageBatch !='' and messageBatch !=null">
+					and message_batch = #{messageBatch}
+				</if>
+				<if test="messageTypeCode !='' and messageTypeCode !=null">
+					and message_type_code = #{messageTypeCode}
+				</if>
+				<if test="title !='' and title !=null">
+					and title like '%${title}%'
+				</if>
+				<if test="content !='' and content !=null ">
+					and content like '%${content}%'
+				</if>
+				<if test="attachments !='' and attachments !=null">
+					and attachments like '%${attachments}%'
+				</if>
+				<if test="sender !='' and sender !=null">
+					and sender = #{sender}
+				</if>
+				<if test="senderId !='' and senderId !=null">
+					and sender_id = #{senderId}
+				</if>
+				<if test="receiver !='' and receiver !=null">
+					and receiver = #{receiver}
+				</if>
+				<if test="receiverId !='' and receiverId !=null">
+					and receiver_id = #{receiverId}
+				</if>
+				<if test="isDeleted !=null">
+					and is_deleted = #{isDeleted}
+				</if>
+				<if test="isReaded !=null">
+					and is_readed = #{isReaded}
+				</if>
+				<if test="inboxId !=null and inboxId !=''">
+					and inbox_id = #{inboxId}
+				</if>
+				<if test="keyword !=null and keyword !='' ">
+					and (title like '%${keyword}%' or content like '%${keyword}%')
+				</if>
+				<if test="typeCodeList !=null and typeCodeList.size() >0">
+					and message_type_code in
+					 <foreach collection="typeCodeList" index="index" item="typeCode" open="("
+					    separator="," close=")">
+					  	 #{typeCode}
+					 </foreach>
+				</if>
+				<if test="userId !=null and companyId !=null">
+					and (receiver_id = #{userId} or receiver_id = #{companyId})
+				</if>
+				<if test="userId !=null and companyId ==null">
+					and receiver_id = #{userId}
+				</if>
+				<if test="userId == null and companyId !=null">
+					and receiver_id = #{companyId}
+				</if>
+				<if test="receivedTime != null">
+					and received_time &gt; #{receivedTime}
+				</if>
+			</where>
+			order by received_time Desc
+			limit #{offset},#{pageSize}
+	</select>
+	
+	<select id="getSiteMessageInboxTotal" resultType="java.lang.Integer" parameterType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageInboxCriteria">
+			select count(1) from b2b_support.bizp_sitemessage_inbox
+			<where>
+				<if test="messageBatch !='' and messageBatch != null">
+					and message_batch = #{messageBatch}
+				</if>
+				<if test="messageTypeCode !='' and messageTypeCode != null">
+					and message_type_code = #{messageTypeCode}
+				</if>
+				<if test="title !='' and title != null">
+					and title like '%${title}%'
+				</if>
+				<if test="content !='' and content != null ">
+					and content like '%${content}%'
+				</if>
+				<if test="attachments !='' and attachments != null">
+					and attachments like '%${attachments}%'
+				</if>
+				<if test="sender !='' and sender != null">
+					and sender = #{sender}
+				</if>
+				<if test="senderId !='' and senderId !=null">
+					and sender_id = #{senderId}
+				</if>
+				<if test="receiver !='' and receiver !=null">
+					and receiver = #{receiver}
+				</if>
+				<if test="receiverId !='' and receiverId !=null">
+					and receiver_id = #{receiverId}
+				</if>
+				<if test="isDeleted !=null">
+					and is_deleted = #{isDeleted}
+				</if>
+				<if test="isReaded !=null">
+					and is_readed = #{isReaded}
+				</if>
+				<if test="inboxId !=null and inboxId !=''">
+					and inbox_id = #{inboxId}
+				</if>
+				<if test="keyword !=null and keyword !='' ">
+					and (title like '%${keyword}%' or content like '%${keyword}%')
+				</if>
+				<if test="typeCodeList !=null and typeCodeList.size() >0">
+					and message_type_code in
+					 <foreach collection="typeCodeList" index="index" item="typeCode" open="("
+					    separator="," close=")">
+					  	 #{typeCode}
+					 </foreach>
+				</if>
+				<if test="userId !=null and companyId !=null">
+					and (receiver_id = #{userId} or receiver_id = #{companyId})
+				</if>
+				<if test="userId !=null and companyId ==null">
+					and receiver_id = #{userId}
+				</if>
+				<if test="userId == null and companyId !=null">
+					and receiver_id = #{companyId}
+				</if>
+				<if test="receivedTime != null">
+					and received_time &gt; #{receivedTime}
+				</if>
+			</where>
+	</select>
+	
+	<insert id="insertSiteMessageOutbox" parameterType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageOutbox">
+		insert into b2b_support.bizp_sitemessage_outbox(
+				outbox_id,
+				message_batch,
+				message_type_code,
+				title,
+				content,
+				attachments,
+				sender,
+				sender_id,
+				receiver,
+				is_deleted,
+				sent_time)
+			 values(
+			 	#{outboxId},
+			 	#{messageBatch},
+			 	#{messageTypeCode},
+			 	#{title},
+			 	#{content},
+			 	#{attachments},
+			 	#{sender},
+			 	#{senderId},
+			 	#{receiver},
+			 	#{isDeleted},
+			 	#{sentTime}
+			 )	
+	</insert>
+	
+	<update id="updateSiteMessageOutbox" parameterType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageOutbox">
+		update b2b_support.bizp_sitemessage_outbox set
+				message_batch=#{messageBatch},
+				message_type_code=#{messageTypeCode},
+				title=#{title},
+				content=#{content},
+				attachments=#{attachments},
+				sender=#{sender},
+				sender_id=#{senderId},
+				receiver=#{receiver},
+				is_deleted=#{isDeleted},
+				sent_time=#{sentTime}
+		<where>
+			outbox_id = #{outboxId}
+		</where>
+	</update>
+	
+	<delete id="deleteSiteMessageOutbox" parameterType="java.lang.String">
+		delete from b2b_support.bizp_sitemessage_outbox where outbox_id =#{0}
+	</delete>
+	
+	<select id="getSiteMessageOutbox" parameterType="java.lang.String" resultType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageOutbox">
+		select
+				outbox_id as outboxId,
+				message_batch as messageBatch,
+				message_type_code as messageTypeCode,
+				title,
+				content,
+				attachments ,
+				sender,
+				sender_id as senderId,
+				receiver,
+				is_deleted as isDeleted,
+				sent_time as sentTime
+		from b2b_support.bizp_sitemessage_outbox
+		<where>
+			outbox_id = #{0}
+		</where>
+	</select>
+	
+	<select id="getSiteMessageOutboxList" parameterType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageOutboxCriteria" 
+		resultType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageOutbox">
+		select
+				outbox_id as outboxId,
+				message_batch as messageBatch,
+				message_type_code as messageTypeCode,
+				title,
+				content,
+				attachments ,
+				sender,
+				sender_id as senderId,
+				receiver,
+				is_deleted as isDeleted,
+				sent_time as sentTime
+		from b2b_support.bizp_sitemessage_outbox
+			<where>
+				<if test="messageBatch !='' and messageBatch !=null">
+					and message_batch = #{messageBatch}
+				</if>
+				<if test="messageTypeCode !='' and messageTypeCode !=null">
+					and message_type_code = #{messageTypeCode}
+				</if>
+				<if test="title !='' and title !=null">
+					and title like '%${title}%'
+				</if>
+				<if test="content !='' and content !=null ">
+					and content like '%${content}%'
+				</if>
+				<if test="attachments !='' and attachments !=null">
+					and attachments like '%${attachments}%'
+				</if>
+				<if test="sender !='' and sender !=null">
+					and sender = #{sender}
+				</if>
+				<if test="receiver !='' and receiver !=null">
+					and receiver = #{receiver}
+				</if>
+				<if test="isDeleted !=null">
+					and is_deleted = #{isDeleted}
+				</if>
+			</where>
+			limit #{offset},#{pageSize}
+	</select>
+	
+	<select id="getSiteMessageOutboxTotal" parameterType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageOutboxCriteria" resultType="java.lang.Integer">
+		select count(1) from b2b_support.bizp_sitemessage_outbox
+			<where>
+				<if test="messageBatch !='' and messageBatch !=null">
+					and message_batch = #{messageBatch}
+				</if>
+				<if test="messageTypeCode !='' and messageTypeCode !=null">
+					and message_type_code = #{messageTypeCode}
+				</if>
+				<if test="title !='' and title !=null">
+					and title like '%${title}%'
+				</if>
+				<if test="content !='' and content !=null">
+					and content like '%${content}%'
+				</if>
+				<if test="attachments !='' and attachments !=null">
+					and attachments like '%${attachments}%'
+				</if>
+				<if test="sender !='' and sender !=null">
+					and sender = #{sender}
+				</if>
+				<if test="receiver !='' and receiver!=null">
+					and receiver = #{receiver}
+				</if>
+				<if test="isDeleted !=null">
+					and is_deleted = #{isDeleted}
+				</if>
+			</where>
+	</select>
+	
+	<insert id="insertSiteMessageInbox" parameterType="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageInbox">
+			insert into b2b_support.bizp_sitemessage_inbox(
+				inbox_id,
+				message_batch,
+				message_type_code,
+				title,
+				content,
+				attachments,
+				sender,
+				sender_id,
+				receiver,
+				receiver_id,
+				is_readed,
+				is_deleted,
+				received_time,
+				readed_time)
+			 values(
+			 	#{inboxId},
+			 	#{messageBatch},
+			 	#{messageTypeCode},
+			 	#{title},
+			 	#{content},
+			 	#{attachments},
+			 	#{sender},
+			 	#{senderId},
+			 	#{receiver},
+			 	#{receiverId},
+			 	#{isReaded},
+			 	#{isDeleted},
+			 	#{receivedTime},
+			 	#{readedTime}
+			 )	
+	</insert>
+	
+	<insert id="batchCreateSiteMessageInbox" parameterType="java.util.List">
+		insert into b2b_support.bizp_sitemessage_inbox(
+			inbox_id, message_batch, message_type_code, title, content, attachments, sender, sender_id, receiver,
+			receiver_id, is_readed, is_deleted, received_time, readed_time)
+		 values
+		 	<foreach collection="list" item="item" index="index" separator=",">
+		 	( #{item.inboxId},#{item.messageBatch},#{item.messageTypeCode},#{item.title},#{item.content},#{item.attachments},#{item.sender},
+		 	#{item.senderId},#{item.receiver},#{item.receiverId},#{item.isReaded},#{item.isDeleted},#{item.receivedTime},#{item.readedTime} )  
+		    </foreach>
+	</insert>
+	
+</mapper>

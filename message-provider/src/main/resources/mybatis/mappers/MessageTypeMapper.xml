@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mysoft.b2b.bizsupport.mapper.MessageTypeMapper">
+
+	<insert id="insertMessageType" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageType" keyProperty="id">
+		INSERT into b2b_support.bizp_message_type (
+			message_type_id,
+			message_type_code,
+			title,
+			channel,
+			remark,
+			created_by
+		)VALUES (
+			#{messageTypeId},
+			#{messageTypeCode},
+			#{title},
+			#{channel},
+			#{remark},
+			#{createdBy}
+		)
+	</insert>
+	<update id="updateMessageType" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageType"  >
+		update  b2b_support.bizp_message_type t
+		SET
+		t.title = #{title},
+		t.channel = #{channel},
+		t.remark = #{remark},
+		t.last_modified_by = #{lastModifiedBy},
+		t.last_modified_time = #{lastModifiedTime}
+		WHERE
+		message_type_id = #{messageTypeId}
+		AND 
+		message_type_code = #{messageTypeCode}
+	</update>
+	
+	<delete id="deleteMessageType" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageType">
+		DELETE FROM b2b_support.bizp_message_type
+		WHERE
+		message_type_id = #{messageTypeId}
+		AND 
+		message_type_code = #{messageTypeCode}
+	</delete>
+	<select id="getMessageType" parameterType="String" resultType="com.mysoft.b2b.bizsupport.api.queue.MessageType">
+		SELECT 
+			t.channel,
+			t.created_by as createdBy,
+			t.created_time as createdTime,
+			t.last_modified_by as lastModifiedBy,
+			t.last_modified_time as lastModifiedTime,
+			t.message_type_code as messageTypeCode,
+			t.message_type_id as messageTypeId,
+			t.remark,
+			t.title
+			 
+			FROM b2b_support.bizp_message_type t
+			WHERE
+			message_type_id = #{0}
+	</select>
+	<select id="getMessageType_1" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageType" resultType="com.mysoft.b2b.bizsupport.api.queue.MessageType">
+		SELECT 
+			t.channel,
+			t.created_by as createdBy,
+			t.created_time as createdTime,
+			t.last_modified_by as lastModifiedBy,
+			t.last_modified_time as lastModifiedTime,
+			t.message_type_code as messageTypeCode,
+			t.message_type_id as messageTypeId,
+			t.remark,
+			t.title
+			 
+			FROM b2b_support.bizp_message_type t
+			WHERE 1=1 
+			<if test="messageTypeId != null and messageTypeId != '' ">
+			 AND  message_type_id = #{messageTypeId}
+		
+			</if>
+			<if test="messageTypeCode != null and messageTypeCode != '' ">
+			 AND  message_type_code = #{messageTypeCode}
+			</if>
+			<if test="title != null and title != '' ">
+			 AND  title like  concat('%',#{title, jdbcType=VARCHAR},'%')
+			</if>
+			limit 1
+	</select>
+	
+	<select id="searchMessageType" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageTypeCriteria" resultType="com.mysoft.b2b.bizsupport.api.queue.MessageType">
+		SELECT 
+			t.channel,
+			t.created_by as createdBy,
+			t.created_time as createdTime,
+			t.last_modified_by as lastModifiedBy,
+			t.last_modified_time as lastModifiedTime,
+			t.message_type_code as messageTypeCode,
+			t.message_type_id as messageTypeId,
+			t.remark,
+			t.title
+			FROM b2b_support.bizp_message_type t
+			WHERE 1=1 
+			<if test="channel != null and channel != '' ">
+			 AND  channel = #{channel}
+			</if>
+			<if test="messageTypeCode != null and messageTypeCode != '' ">
+			 AND  message_type_code = #{messageTypeCode}
+			</if>
+			<if test="title != null and title != '' ">
+			 AND  title like  concat('%',#{title, jdbcType=VARCHAR},'%')
+			</if>
+			order by created_time DESC
+			limit #{offset},#{pageSize}
+	</select>
+	<select id="searchMessageTypeSize" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageTypeCriteria" resultType="Integer">
+		SELECT 
+			COUNT(*)
+			FROM b2b_support.bizp_message_type t
+			WHERE 1=1 
+			<if test="channel != null and channel != '' ">
+			 AND  channel = #{channel}
+			</if>
+			<if test="messageTypeCode != null and messageTypeCode != '' ">
+			 AND  message_type_code = #{messageTypeCode}
+			</if>
+			<if test="title != null and title != '' ">
+			 AND title like concat('%',#{title, jdbcType=VARCHAR},'%')
+			</if>
+			
+	</select>
+	
+	<select id="getMessageTypeList" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageTypeCriteria" resultType="com.mysoft.b2b.bizsupport.api.queue.MessageType">
+		SELECT 
+			t.channel,
+			t.message_type_code as messageTypeCode,
+			t.message_type_id as messageTypeId,
+			t.title
+		FROM b2b_support.bizp_message_type t
+		WHERE 1=1
+		<if test="typeCodeList !=null and typeCodeList.size() >0">
+			AND message_type_code in
+		 <foreach collection="typeCodeList" index="index" item="typeCode" open="("
+		    separator="," close=")">
+		  	 #{typeCode}
+		 </foreach>
+		</if>
+	</select>
+	
+</mapper>
+

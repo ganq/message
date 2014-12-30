@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+	
+    <dubbo:service ref="messageCenterService" interface="com.mysoft.b2b.bizsupport.api.MessageCenterService" register="false"/>
+	<dubbo:service ref="messageQueueService" interface="com.mysoft.b2b.bizsupport.api.queue.MessageQueueService" register="false"/>
+	<dubbo:service ref="smsService" interface="com.mysoft.b2b.bizsupport.api.sms.SMSService" register="false"/>
+	<dubbo:service ref="emailService" interface="com.mysoft.b2b.bizsupport.api.email.EmailService" register="false"/>
+	<dubbo:service ref="siteMessageService" interface="com.mysoft.b2b.bizsupport.api.sitemessage.SiteMessageService" register="false"/>
+	<dubbo:service ref="messageTypeService" interface="com.mysoft.b2b.bizsupport.api.queue.MessageTypeService" register="false"/>
+	<dubbo:service ref="verifyCodeFeedbackService" interface="com.mysoft.b2b.bizsupport.api.VerifyCodeFeedbackService" />
+	
+	<dubbo:reference id="idGenerationService" interface="com.mysoft.b2b.bizsupport.api.IdGenerationService"/>
+	
+</beans>

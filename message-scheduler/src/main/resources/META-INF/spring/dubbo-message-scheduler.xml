@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"
+	>
+	<!-- 开启注解配置 -->
+	<context:annotation-config />
+
+	<!-- 扫描service层 -->
+	<context:component-scan base-package="com.mysoft.b2b.bizsupport.scheduler.provider" />
+	
+	<bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">   
+	    <property name="locations">   
+	        <list>
+	            <value>classpath:b2b.config.properties</value>
+	        </list>
+	    </property>
+	</bean>
+	<bean id="springContextAware" class="com.mysoft.b2b.bizsupport.scheduler.util.SpringContextAware" lazy-init="false" destroy-method="destroy"/>
+	
+	<!-- 邮件配置 -->
+	<bean id="emailInfo" class="com.mysoft.b2b.bizsupport.scheduler.email.EmailInfo">
+		<property name="emailFrom" value="${email.emailFrom}" />
+		<property name="userName" value="${email.userName}" />
+		<property name="password" value="${email.password}" />
+		<property name="displayName" value="${email.displayName}" />
+		<property name="emailServerHost" value="${email.emailServerHost}" />
+		<property name="emailServerPort" value="${email.emailServerPort}" />
+	</bean>
+	<bean id="emailSendService" class="com.mysoft.b2b.bizsupport.scheduler.email.EmailSendServiceImpl" />
+	
+	<!-- 短信配置 -->
+	<bean id="smsConfig" class="com.mysoft.b2b.bizsupport.scheduler.sms.SMSConfig">
+		<property name="channelId" value="${sms.channelId}" />
+		<property name="code" value="${sms.code}" />
+		<property name="user" value="${sms.user}" />
+		<property name="password" value="${sms.password}" />
+		<property name="url" value="${sms.url}" />
+		<property name="serviceType" value="${sms.serviceType}" />
+		<property name="serviceClass" value="${sms.serviceClass}" />
+	</bean>
+	
+	<!-- 商机推送短信配置 -->
+	<bean id="smsConfig2" class="com.mysoft.b2b.bizsupport.scheduler.sms.SMSConfig">
+		<property name="channelId" value="${sms2.channelId}" />
+		<property name="code" value="${sms2.code}" />
+		<property name="user" value="${sms2.user}" />
+		<property name="password" value="${sms2.password}" />
+		<property name="url" value="${sms2.url}" />
+		<property name="serviceType" value="${sms2.serviceType}" />
+		<property name="serviceClass" value="${sms2.serviceClass}" />
+	</bean>
+	
+	<!-- 新通道都在这里注入实现类 -->
+	<bean id="mobsetChannelService" class="com.mysoft.b2b.bizsupport.scheduler.sms.mobset.MobsetChannelServiceImpl" />
+
+	<!-- 邮件 -->
+	<bean id="emailSchedulerJob" class="com.mysoft.b2b.bizsupport.scheduler.job.EmailSchedulerJob">
+		<property name="jobName" value="Deal Email's Job"></property>
+		<property name="cronExpression">
+			<value>${email.cronexpression}</value>
+		</property>
+	</bean>
+	
+	<!-- 短信 -->
+	<bean id="smsSchedulerJob" class="com.mysoft.b2b.bizsupport.scheduler.job.SMSSchedulerJob">
+		<property name="jobName" value="Deal SMS's Job"></property>
+		<property name="cronExpression">
+			<value>${sms.cronexpression}</value>
+		</property>
+		<property name="params">
+			<map>
+				<entry key="sms2MessageTypeCodes" value="${sms2.messagetype.codes}"/>
+			</map>
+		</property>
+	</bean>
+	
+	<!-- 短信接受 -->
+	<bean id="smsReplySchedulerJob" class="com.mysoft.b2b.bizsupport.scheduler.job.SMSReplySchedulerJob">
+		<property name="jobName" value="Deal SMSReply's Job"></property>
+		<property name="cronExpression">
+			<value>${smsReply.cronexpression}</value>
+		</property>
+	</bean>
+	
+	<!-- 消息队列 -->
+	<bean id="messageQueueSchedulerJob" class="com.mysoft.b2b.bizsupport.scheduler.job.MessageQueueSchedulerJob">
+		<property name="jobName" value="Deal Message's Job"></property>
+		<property name="cronExpression">
+			<value>${queue.cronexpression}</value>
+		</property>
+	</bean>
+	
+	<!-- 总管理类 -->
+	<bean id="quartz" lazy-init="false" init-method="init" destroy-method="destory" 
+			class="com.mysoft.b2b.bizsupport.scheduler.util.SchedulerFactory">
+		<property name="jobs">
+			<list>
+				<ref bean="emailSchedulerJob" />
+				<ref bean="smsSchedulerJob" />
+				<ref bean="messageQueueSchedulerJob" />
+				<ref bean="smsReplySchedulerJob" />
+			</list>
+		</property>
+	</bean>
+	
+</beans>
+

@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mysoft.b2b.bizsupport.mapper.MessageQueueMapper">
+
+
+	<insert id="insertMessageQueue" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageQueue" keyProperty="id">
+		INSERT into b2b_support.bizp_message_queue (
+			attachments,
+			channel,
+			content,
+			message_batch,
+			message_type_code,
+			remark,
+			queue_id,
+			receiver,
+			sender,
+			sender_id,
+			`status`,
+			title,
+			try_times,
+			dealt_time
+		)VALUES (
+			#{attachments},
+			#{channel},
+			#{content},
+			#{messageBatch},
+			#{messageTypeCode},
+			#{remark},
+			#{queueId},
+			#{receiver},
+			#{sender},
+			#{senderId},
+			#{status},
+			#{title},
+			#{tryTimes},
+			#{dealtTime}
+		)
+	</insert>
+	
+	
+	<update id="updateMessageQueue" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageQueue"  >
+		update  b2b_support.bizp_message_queue t
+		SET
+			attachments = #{attachments},
+			channel = #{channel},
+			content	= #{content},
+			message_batch	= #{messageBatch},
+			message_type_code	=#{messageTypeCode},
+			remark	= #{remark},
+			receiver	= #{receiver},
+			sender	= #{sender},
+			sender_id	= #{senderId},
+			status	= #{status},
+			title	= #{title},
+			try_times	= #{tryTimes},
+			dealt_time = #{dealtTime}
+		WHERE
+		queue_id = #{queueId}
+	</update>
+	
+	<delete id="deleteMessageQueue" parameterType="String">
+		DELETE FROM b2b_support.bizp_message_queue
+		WHERE
+		queue_id = #{0}
+	</delete>
+	
+	
+	<select id="getMessageQueue" parameterType="String" resultType="com.mysoft.b2b.bizsupport.api.queue.MessageQueue">
+		SELECT 
+			attachments,
+			channel,
+			content,
+			message_batch as messageBatch,
+			message_type_code as messageTypeCode,
+			remark,
+			queue_id as queueId,
+			receiver,
+			sender,
+			sender_id as senderId,
+			`status`,
+			title,
+			try_times as tryTimes,
+			created_time as createdTime,
+			dealt_time as dealtTime
+			FROM b2b_support.bizp_message_queue t
+			WHERE
+			queue_id = #{0}
+	</select>
+	
+	<select id="getMessageQueue_1" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageQueue" resultType="com.mysoft.b2b.bizsupport.api.queue.MessageQueue">
+		SELECT 
+			attachments,
+			channel,
+			content,
+			message_batch as messageBatch,
+			message_type_code as messageTypeCode,
+			remark,
+			queue_id as queueId,
+			receiver,
+			sender,
+			sender_id as senderId,
+			`status`,
+			title,
+			try_times as tryTimes,
+			created_time as createdTime,
+			dealt_time as dealtTime
+			FROM b2b_support.bizp_message_queue t
+			WHERE 1=1 
+			<if test="queueId != null and queueId != '' ">
+			 AND  queue_id = #{queueId}
+			</if>
+			limit 1
+	</select>
+
+	<select id="getSchedulerMessageQueueList" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageQueueCriteria"
+		 resultType="com.mysoft.b2b.bizsupport.api.queue.MessageQueue">
+		SELECT 
+			attachments,
+			channel,
+			content,
+			message_batch as messageBatch,
+			message_type_code as messageTypeCode,
+			remark,
+			queue_id as queueId,
+			receiver,
+			sender,
+			sender_id as senderId,
+			`status`,
+			title,
+			try_times as tryTimes,
+			created_time as createdTime,
+			dealt_time as dealtTime
+		FROM b2b_support.bizp_message_queue t
+		where
+			(status=1 and dealt_time is null) 
+		 or (status=1 and dealt_time is not null and try_times &lt; #{tryTimes} )
+  		 or ( (status=2 or status=4) and try_times &lt; #{tryTimes} and #{dealtTime} &gt; dealt_time )
+			order by created_time DESC,queue_id
+			limit #{offset},#{pageSize}
+	</select>
+	
+	<select id="getMessageQueueList" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageQueueCriteria" resultType="com.mysoft.b2b.bizsupport.api.queue.MessageQueue">
+		SELECT 
+			attachments,
+			channel,
+			content,
+			message_batch as messageBatch,
+			message_type_code as messageTypeCode,
+			remark,
+			queue_id as queueId,
+			receiver,
+			sender,
+			sender_id as senderId,
+			`status`,
+			title,
+			try_times as tryTimes,
+			created_time as createdTime,
+			dealt_time as dealtTime
+		FROM b2b_support.bizp_message_queue t
+		WHERE 1=1 
+			<if test="channel != null and channel != '' ">
+			 AND  channel = #{channel}
+			</if>
+			<if test="senderId != null and senderId != '' ">
+			 AND  sender_id = #{senderId}
+			</if>
+			<if test="sender != null and sender != '' ">
+			 AND  sender = #{sender}
+			</if>
+			<if test="title != null and title != '' ">
+			 AND  title like concat('%',#{title, jdbcType=VARCHAR},'%')
+			</if>
+			<if test="messageTypeCode != null and messageTypeCode != '' ">
+			 AND  message_type_code = #{messageTypeCode}
+			</if>
+			<if test="messageBatch != null and messageBatch != '' ">
+			 AND  message_batch = #{messageBatch}
+			</if>
+			<if test="receiver != null and receiver != '' ">
+			 AND receiver like '%${receiver}%'
+			</if>
+			<if test="content != null and content != '' ">
+			 AND  content like concat('%',#{content, jdbcType=VARCHAR},'%') 
+			</if>
+			<if test="status != null  ">
+			 AND  status = #{status}
+			</if>
+			<if test="tryTimes != 0">
+			 AND try_times &gt; #{tryTimes}
+			</if>
+			<if test="statuss != null and statuss.size() > 0">
+			 AND status IN
+			<foreach collection="statuss" item="st" index="index" open="(" separator=", " close=")">
+					#{st, jdbcType=TINYINT} 
+			</foreach>
+			</if>
+			<if test="createdTime !=null">
+			 AND created_time &gt; #{createdTime}
+			</if>
+			order by created_time DESC,queue_id
+			limit #{offset},#{pageSize}
+   
+	</select>
+	
+	<select id="getMessageQueueListSize" parameterType="com.mysoft.b2b.bizsupport.api.queue.MessageQueueCriteria" resultType="Integer">
+		SELECT 
+			COUNT(*)
+		FROM b2b_support.bizp_message_queue t
+		WHERE 1=1 
+			<if test="channel != null and channel != '' ">
+			 AND  channel = #{channel}
+			</if>
+			<if test="senderId != null and senderId != '' ">
+			 AND  sender_id = #{senderId}
+			</if>
+			<if test="sender != null and sender != '' ">
+			 AND  sender = #{sender}
+			</if>
+			<if test="title != null and title != '' ">
+			 AND  title like concat('%',#{title, jdbcType=VARCHAR},'%')
+			</if>
+			<if test="messageTypeCode != null and messageTypeCode != '' ">
+			 AND  message_type_code = #{messageTypeCode}
+			</if>
+			<if test="messageBatch != null and messageBatch != '' ">
+			 AND  message_batch = #{messageBatch}
+			</if>
+			<if test="receiver != null and receiver != '' ">
+			 AND receiver like '%${receiver}%'
+			</if>
+			<if test="content != null and content != '' ">
+			 AND content like concat('%',#{content, jdbcType=VARCHAR},'%') 
+			</if>
+			<if test="status != null">
+			 AND status = #{status}
+			</if>
+			<if test="tryTimes != 0">
+			 AND try_times &gt; #{tryTimes}
+			</if>
+			<if test="statuss != null and statuss.size() > 0">
+			 AND status IN
+			<foreach collection="statuss" item="st" index="index" open="(" separator=", " close=")">
+					#{st, jdbcType=TINYINT} 
+			</foreach>
+			</if>
+			<if test="createdTime !=null">
+			 AND created_time &gt; #{createdTime}
+			</if>
+	</select>
+	
+</mapper>

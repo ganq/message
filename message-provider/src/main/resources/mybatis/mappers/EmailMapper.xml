@@ -1,0 +1,374 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        
+<mapper namespace="com.mysoft.b2b.bizsupport.mapper.EmailMapper">
+	<insert id="insertEmailJob" parameterType="com.mysoft.b2b.bizsupport.api.email.EmailJob">
+		insert into b2b_support.bizp_email_job(
+			email_job_id,
+			message_batch,
+			message_type_code,
+			title,
+			content,
+			attachments,
+			sender,
+			sender_id,
+			receiver,
+			status,
+			try_times,
+			created_time,
+			last_sent_time,
+			remark
+		) values(
+			#{emailJobId},
+			#{messageBatch},
+			#{messageTypeCode},
+			#{title},
+			#{content},
+			#{attachments},
+			#{sender},
+			#{senderId},
+			#{receiver},
+			#{status},
+			#{tryTimes},
+			#{createdTime},
+			#{lastSentTime},
+			#{remark}
+		)
+	</insert>
+	
+	<update id="updateEmailJob" parameterType="com.mysoft.b2b.bizsupport.api.email.EmailJob">
+		update b2b_support.bizp_email_job set
+			message_batch = #{messageBatch},
+			message_type_code = #{messageTypeCode},
+			title = #{title},
+			content = #{content},
+			attachments = #{attachments},
+			sender = #{sender},
+			sender_id = #{senderId},
+			receiver = #{receiver},
+			status = #{status},
+			try_times = #{tryTimes},
+			created_time = #{createdTime},
+			last_sent_time = #{lastSentTime},
+			remark = #{remark}
+		<where>
+			email_job_id = #{emailJobId}
+		</where>
+	</update>
+	
+	<delete id="deleteEmailJob" parameterType="java.lang.String">
+		delete from b2b_support.bizp_email_job 
+		<where>
+			email_job_id = #{0}
+		</where>
+	</delete>
+	
+	<select id="getEmailJob" parameterType="java.lang.String" resultType="com.mysoft.b2b.bizsupport.api.email.EmailJob">
+		select 
+			email_job_id as emailJobId,
+			message_batch as messageBatch,
+			message_type_code as messageTypeCode,
+			title as title,
+			content as content,
+			attachments as attachments,
+			sender as sender,
+			sender_id as senderId,
+			receiver as receiver,
+			status as status,
+			try_times as tryTimes,
+			created_time as createdTime,
+			last_sent_time as lastSentTime,
+			remark as remark
+		from b2b_support.bizp_email_job where email_job_id = #{0}
+	</select>
+	
+	<select id="getSchedulerEmailJobList" parameterType="com.mysoft.b2b.bizsupport.api.email.EmailJobCriteria" 
+			resultType="com.mysoft.b2b.bizsupport.api.email.EmailJob">
+		select 
+			email_job_id as emailJobId,
+			message_batch as messageBatch,
+			message_type_code as messageTypeCode,
+			title as title,
+			content as content,
+			attachments as attachments,
+			sender as sender,
+			sender_id as senderId,
+			receiver as receiver,
+			status as status,
+			try_times as tryTimes,
+			created_time as createdTime,
+			last_sent_time as lastSentTime,
+			remark as remark
+		from b2b_support.bizp_email_job
+		where
+			(status=1 and last_sent_time is null) 
+		 or (status=1 and last_sent_time is not null and try_times &lt; #{tryTimes} )
+  		 or ( (status=2 or status=4) and try_times &lt; #{tryTimes} and #{lastSentTime} &gt; last_sent_time )
+			limit #{offset},#{pageSize}
+	</select>
+	
+	<select id="getEmailJobList" parameterType="com.mysoft.b2b.bizsupport.api.email.EmailJobCriteria" 
+			resultType="com.mysoft.b2b.bizsupport.api.email.EmailJob">
+		select 
+			email_job_id as emailJobId,
+			message_batch as messageBatch,
+			message_type_code as messageTypeCode,
+			title as title,
+			content as content,
+			attachments as attachments,
+			sender as sender,
+			sender_id as senderId,
+			receiver as receiver,
+			status as status,
+			try_times as tryTimes,
+			created_time as createdTime,
+			last_sent_time as lastSentTime,
+			remark as remark
+		from b2b_support.bizp_email_job
+		<where>
+			<if test="status !=0">
+				and status = #{status,jdbcType=TINYINT}
+			</if>
+			<if test="messageTypeCode != null and messageTypeCode != '' ">
+			 AND  message_type_code = #{messageTypeCode}
+			</if>
+			<if test="messageBatch != null and messageBatch != '' ">
+			 AND  message_batch = #{messageBatch}
+			</if>
+			<if test="title !='' and title !=null">
+				and title like '%${title}%'
+			</if>
+			<if test="content !='' and content !=null">
+				and content like '%${content}%'
+			</if>
+			<if test="sender !='' and sender !=null">
+				and sender = #{sender}
+			</if>
+			<if test="senderId !='' and senderId !=null">
+				and sender_id = #{senderId}
+			</if>
+			<if test="receiver !='' and receiver !=null">
+				and receiver like '%${receiver}%'
+			</if>
+			<if test="tryTimes != 0">
+				and try_times &lt; #{tryTimes}
+			</if>
+			<if test="lastSentTime !='' and lastSentTime !=null">
+				and (last_sent_time is null or last_sent_time &lt; #{lastSentTime})
+			</if>
+			<if test="statuss !=null and statuss.size()>0">
+				and status in 
+			<foreach collection="statuss" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			</if>
+		</where>
+		order by created_time DESC
+		limit #{offset},#{pageSize}
+	</select>
+	
+	<select id="getEmailJobListCount" resultType="java.lang.Integer" parameterType="com.mysoft.b2b.bizsupport.api.email.EmailJobCriteria" >
+		select count(1) from b2b_support.bizp_email_job
+		<where>
+			<if test="status !=0">
+				and status = #{status,jdbcType=TINYINT}
+			</if>
+			<if test="messageTypeCode != null and messageTypeCode != '' ">
+			 AND  message_type_code = #{messageTypeCode}
+			</if>
+			<if test="messageBatch != null and messageBatch != '' ">
+			 AND  message_batch = #{messageBatch}
+			</if>
+			<if test="title !='' and title !=null">
+				and title like '%${title}%'
+			</if>
+			<if test="content !='' and content !=null">
+				and content like '%${content}%'
+			</if>
+			<if test="sender !='' and sender!=null">
+				and sender = #{sender}
+			</if>
+			<if test="senderId !='' and senderId !=null">
+				and sender_id = #{senderId}
+			</if>
+			<if test="lastSentTime !='' and lastSentTime !=null">
+				and (last_sent_time is null or last_sent_time &lt; #{lastSentTime})
+			</if>
+			<if test="receiver !='' and receiver !=null">
+				and receiver like '%${receiver}%'
+			</if>
+			<if test="tryTimes != 0">
+				and try_times &lt; #{tryTimes}
+			</if>
+			<if test="statuss !=null and statuss.size()>0">
+				and status in 
+				<foreach collection="statuss" item="item" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</select>
+	
+	<insert id="insertEmailLog" parameterType="com.mysoft.b2b.bizsupport.api.email.EmailLog">
+		insert into b2b_support.bizp_email_log(
+			email_log_id,
+			message_batch,
+			message_type_code,
+			title,
+			content,
+			attachments,
+			sender,
+			sender_id,
+			receiver,
+			status,
+			try_times,
+			created_time,
+			last_sent_time,
+			remark
+		)values(
+			#{emailLogId},
+			#{messageBatch},
+			#{messageTypeCode},
+			#{title},
+			#{content},
+			#{attachments},
+			#{sender},
+			#{senderId},
+			#{receiver},
+			#{status},
+			#{tryTimes},
+			#{createdTime},
+			#{lastSentTime},
+			#{remark}
+		)
+	</insert>
+	
+	<update id="updateEmailLog" parameterType="com.mysoft.b2b.bizsupport.api.email.EmailLog">
+		update b2b_support.bizp_email_log set
+			message_batch = #{messageBatch},
+			message_type_code = #{messageTypeCode},
+			title = #{title},
+			content = #{content},
+			attachments = #{attachments},
+			sender = #{sender},
+			sender_id = #{senderId},
+			receiver = #{receiver},
+			status = #{status},
+			try_times = #{tryTimes},
+			created_time = #{createdTime},
+			last_sent_time = #{lastSentTime},
+			remark = #{remark}
+		<where>
+			email_log_id = #{emailLogId}
+		</where>
+	</update>
+	
+	
+	<delete id="deleteEmailLog" parameterType="java.lang.String">
+		delete from b2b_support.bizp_email_log
+		<where>
+			email_log_id = #{0}
+		</where>
+	</delete>
+	
+	<select id="getEmailLog" parameterType="java.lang.String" 
+		resultType="com.mysoft.b2b.bizsupport.api.email.EmailLog">
+		select 
+			email_log_id as emailLogId,
+			message_batch as messageBatch,
+			message_type_code as messageTypeCode,
+			title as title,
+			content as content,
+			attachments as attachments,
+			sender as sender,
+			sender_id as senderId,
+			receiver as receiver,
+			status as status,
+			try_times as tryTimes,
+			created_time as createdTime,
+			last_sent_time as lastSentTime,
+			remark as remark
+		from b2b_support.bizp_email_log 
+		where email_log_id = #{0}
+	</select>
+	
+	<select id="getEmailLogList" parameterType="com.mysoft.b2b.bizsupport.api.email.EmailLogCriteria"
+		 resultType="com.mysoft.b2b.bizsupport.api.email.EmailLog">
+		select 
+			email_log_id as emailLogId,
+			message_batch as messageBatch,
+			message_type_code as messageTypeCode,
+			title as title,
+			content as content,
+			attachments as attachments,
+			sender as sender,
+			sender_id as senderId,
+			receiver as receiver,
+			status as status,
+			try_times as tryTimes,
+			created_time as createdTime,
+			last_sent_time as lastSentTime,
+			remark as remark
+		from b2b_support.bizp_email_log
+		<where>
+			<if test="status !=0">
+				and status = #{status,jdbcType=TINYINT}
+			</if>
+			<if test="messageTypeCode != null and messageTypeCode != '' ">
+			 AND  message_type_code = #{messageTypeCode}
+			</if>
+			<if test="messageBatch != null and messageBatch != '' ">
+			 AND  message_batch = #{messageBatch}
+			</if>
+			<if test="title !='' and title != null">
+				and title like '%${title}%'
+			</if>
+			<if test="content !='' and content != null">
+				and content like '%${content}%'
+			</if>
+			<if test="sender !='' and sender != null">
+				and sender = #{sender}
+			</if>
+			<if test="receiver !='' and receiver != null">
+				and receiver like '%${receiver}%'
+			</if>
+			<if test="lastSentTime !=null">
+				and last_sent_time &gt; #{lastSentTime}
+			</if>
+		</where>
+		order by last_sent_time DESC
+		limit #{offset},#{pageSize}
+	</select>
+	
+	<select id="getEmailLogListCount" resultType="java.lang.Integer" parameterType="com.mysoft.b2b.bizsupport.api.email.EmailLogCriteria" >
+		select count(1) from b2b_support.bizp_email_log
+		<where>
+			<if test="status !=0">
+				and status = #{status,jdbcType=TINYINT}
+			</if>
+			<if test="messageTypeCode != null and messageTypeCode != '' ">
+			 AND  message_type_code = #{messageTypeCode}
+			</if>
+			<if test="messageBatch != null and messageBatch != '' ">
+			 AND  message_batch = #{messageBatch}
+			</if>
+			<if test="title !='' and title !=null">
+				and title like '%${title}%'
+			</if>
+			<if test="content !='' and content !=null">
+				and content like '%${content}%'
+			</if>
+			<if test="sender !='' and sender !=null">
+				and sender = #{sender}
+			</if>
+			<if test="receiver !='' and receiver !=null">
+				and receiver like '%${receiver}%'
+			</if>
+			<if test="lastSentTime !=null">
+				and last_sent_time &gt; #{lastSentTime}
+			</if>
+		</where>
+	</select>
+
+</mapper>             
